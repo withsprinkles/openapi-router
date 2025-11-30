@@ -3,7 +3,7 @@ name: Publish to npm
 on:
   release:
     types: [published]
-  workflow_dispatch:
+  # workflow_dispatch:
 
 permissions:
   contents: read
@@ -80,4 +80,12 @@ jobs:
           EOF
 
       - name: Publish to npm
-        run: bun publish --access public --tag "${{ steps.derive_tag.outputs.npm_tag }}"
+        run: |
+          # Publish with the derived tag
+          bun publish --access public --tag "${{ steps.derive_tag.outputs.npm_tag }}"
+
+          # For pre-1.0 versions (alpha), also add the latest tag
+          if [ "${{ steps.derive_tag.outputs.npm_tag }}" = "alpha" ]; then
+            echo "Adding 'latest' tag to pre-1.0 release..."
+            npm dist-tag add @withsprinkles/openapi-router@${{ steps.derive_tag.outputs.version }} latest
+          fi
