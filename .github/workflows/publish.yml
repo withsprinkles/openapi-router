@@ -73,7 +73,11 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "npm_tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Setup npm authentication
+        run: |
+          cat << EOF > .npmrc
+          //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+          EOF
+
       - name: Publish to npm
         run: bun publish --access public --tag "${{ steps.derive_tag.outputs.npm_tag }}"
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
