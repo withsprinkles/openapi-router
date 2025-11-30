@@ -13,14 +13,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Mise
+      - name: ⚙️ Setup build tools
         uses: jdx/mise-action@v2
 
-      - name: Verify installation
-        run: |
-          echo "Verifying node_modules and get-tsconfig..."
-          ls -la node_modules/ | head -20
-          test -d node_modules/get-tsconfig && echo "✓ get-tsconfig found" || echo "✗ get-tsconfig NOT found"
+      - name: 🗄️ Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Run tests
         run: mise run test

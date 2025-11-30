@@ -5,7 +5,13 @@ bun = "latest"
 bun = true
 
 [hooks]
-postinstall = "bun install"
+postinstall = """
+if [ "$CI" = "true" ]; then
+  exit 0
+fi
+
+bun install
+"""
 
 [env]
 _.path = ["{{config_root}}/.shims", '{{config_root}}/node_modules/.bin']
