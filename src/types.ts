@@ -411,7 +411,9 @@ export type RouteContext<R extends RouteConfig> = {
     url: URL;
     headers: SuperHeaders;
     request: Request;
-    formData: FormData | undefined;
+    // formData: FormData | undefined;
+    // TODO: Pass through the correct generic types for the raw Hono.Context
+    raw: Context;
 };
 
 export type ContextHandler<
@@ -442,6 +444,11 @@ export type Router<
                 : MaybePromise<RouteConfigToTypedResponse<R>> | MaybePromise<Response>
         >,
     ): void;
+};
+
+export type RouterOptions<E extends Env = Env, BasePath extends string = "/"> = HonoInit<E> & {
+    basePath?: BasePath;
+    middleware?: MiddlewareHandler<E, BasePath, any> | MiddlewareHandler<E, BasePath, any>[];
 };
 
 export interface ResponseInit<T extends StatusCode = StatusCode> {

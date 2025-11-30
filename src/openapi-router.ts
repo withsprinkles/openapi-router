@@ -4,7 +4,14 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import type { RequestMethod, Route } from "@remix-run/fetch-router";
 import SuperHeaders from "@remix-run/headers";
 import type { Env, Schema } from "hono/types";
-import type { ExtractParamName, JSONRespond, RouteConfig, Router, SkipParamName } from "./types.ts";
+import type {
+    ExtractParamName,
+    JSONRespond,
+    RouteConfig,
+    Router,
+    RouterOptions,
+    SkipParamName,
+} from "./types.ts";
 
 export type ToOpenApiPath<Pattern extends string> =
     Pattern extends `${infer Head}:${infer AfterColon}`
@@ -61,16 +68,31 @@ export function createSpec<
     }) as any;
 }
 
-export function createRouter<E extends Env = Env, BasePath extends string = "/">(): Router<
-    E,
-    Schema,
-    BasePath
-> {
-    const oapi = new OpenAPIHono<E, Schema, BasePath>();
+export function createRouter<E extends Env = Env, BasePath extends string = "/">(
+    options?: RouterOptions<E, BasePath>,
+): Router<E, Schema, BasePath> {
+    const { basePath, middleware, ...honoOptions } = options ?? {};
 
-    const router = oapi as Router<E, Schema, BasePath>;
+    // Create the OpenAPIHono instance with the provided options
+    const oapi = new OpenAPIHono<E, Schema, BasePath>(honoOptions);
+
+    // Apply base path if provided
+    let instance = oapi;
+    if (basePath) {
+        instance = oapi.basePath(basePath) as typeof oapi;
+    }
+
+    // Apply global middleware if provided
+    if (middleware) {
+        const middlewares = Array.isArray(middleware) ? middleware : [middleware];
+        for (const mw of middlewares) {
+            instance.use(mw);
+        }
+    }
+
+    const router = instance as Router<E, Schema, BasePath>;
     router.map = <R extends RouteConfig>(config: R, handler: any) => {
-        oapi.openapi(config as any, async c => {
+        instance.openapi(config as any, async c => {
             // @ts-expect-error validations cannot be typed at the generic level
             const params = c.req.valid("param");
             // @ts-expect-error validations cannot be typed at the generic level
@@ -87,7 +109,8 @@ export function createRouter<E extends Env = Env, BasePath extends string = "/">
                 headers: new SuperHeaders(c.req.raw.headers),
                 request: c.req.raw,
                 // TODO: Handle formData when present
-                formData: undefined,
+                // formData: undefined,
+                raw: c,
             });
         });
     };
@@ -107,3 +130,4 @@ export { createJsonResponse as json };
 
 export { z } from "@hono/zod-openapi";
 export { createRoutes, formAction, resource, resources, route } from "@remix-run/fetch-router";
+export type { RouterOptions } from "./types.ts";

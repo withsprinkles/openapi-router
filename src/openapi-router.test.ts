@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, test } from "bun:test";
+import type { MiddlewareHandler } from "hono/types";
 import {
     createRouter,
     createRoutes,
@@ -221,6 +222,48 @@ describe("createRouter", () => {
     test("type level: router type is correct", () => {
         const router = createRouter();
         expectTypeOf(router).toExtend<Router>();
+    });
+
+    test("creates router with basePath option", () => {
+        const router = createRouter({ basePath: "/api" });
+        expect(router).toBeDefined();
+        expect(router.map).toBeFunction();
+    });
+
+    test("creates router with middleware option (single)", () => {
+        const mockMiddleware: MiddlewareHandler = async (_c, next) => {
+            await next();
+        };
+
+        const router = createRouter({ middleware: mockMiddleware });
+        expect(router).toBeDefined();
+        expect(router.map).toBeFunction();
+    });
+
+    test("creates router with middleware option (array)", () => {
+        const mockMiddleware1: MiddlewareHandler = async (_c, next) => {
+            await next();
+        };
+        const mockMiddleware2: MiddlewareHandler = async (_c, next) => {
+            await next();
+        };
+
+        const router = createRouter({ middleware: [mockMiddleware1, mockMiddleware2] });
+        expect(router).toBeDefined();
+        expect(router.map).toBeFunction();
+    });
+
+    test("creates router with both basePath and middleware", () => {
+        const mockMiddleware: MiddlewareHandler = async (_c, next) => {
+            await next();
+        };
+
+        const router = createRouter({
+            basePath: "/api",
+            middleware: mockMiddleware,
+        });
+        expect(router).toBeDefined();
+        expect(router.map).toBeFunction();
     });
 });
 
