@@ -6,6 +6,6 @@ import { rm } from "node:fs/promises";
 import { $ } from "bun";
 import { build } from "./build/build.ts";
 
-await rm("dist", { recursive: true });
+await rm("dist", { recursive: true, force: true });
 await $`mise run check`;
 await build();
