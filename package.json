@@ -1,6 +1,6 @@
 {
     "name": "@withsprinkles/openapi-router",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "type": "module",
     "description": "",
     "repository": {
@@ -27,10 +27,12 @@
         "LICENSE"
     ],
     "dependencies": {
+        "@remix-run/response": "^0.2.0"
+    },
+    "peerDependencies": {
         "@hono/zod-openapi": "^1.1.5",
         "@remix-run/fetch-router": "^0.12.0",
-        "@remix-run/headers": "^0.18.0",
-        "@remix-run/response": "^0.2.0",
+        "@remix-run/headers": "^0.17.2 || ^0.18.0",
         "@remix-run/route-pattern": "^0.15.3",
         "zod": "^4.1.13",
         "zod-openapi": "^5.4.5"
