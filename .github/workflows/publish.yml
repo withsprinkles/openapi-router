@@ -32,11 +32,45 @@ jobs:
       - name: Build package
         run: mise run build
 
+      - name: Derive npm tag from git tag
+        id: derive_tag
+        run: |
+          # GITHUB_REF_NAME is e.g. "v0.1.0" / "v1.0.0-alpha.0" / "v2.3.1"
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          echo "Detected version: $VERSION"
+
+          # Extract MAJOR (before first dot)
+          MAJOR="${VERSION%%.*}"
+
+          NPM_TAG=""
+
+          if [ "$MAJOR" -eq 0 ]; then
+            # All pre-1.0.0 releases go to the alpha channel
+            NPM_TAG="alpha"
+          else
+            # 1.0.0 and above
+            if [[ "$VERSION" == *-* ]]; then
+              # Has a prerelease part, e.g. "1.0.0-alpha.0"
+              PRERELEASE="${VERSION#*-}"       # "alpha.0"
+              CHANNEL="${PRERELEASE%%.*}"      # "alpha"
+              NPM_TAG="$CHANNEL"
+            else
+              # Stable 1.0.0+ release
+              NPM_TAG="latest"
+            fi
+          fi
+
+          echo "Resolved npm tag: $NPM_TAG"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "npm_tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Setup npm authentication
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish to npm
-        run: bun publish --access public
+        run: bun publish --access public --tag "${{ steps.derive_tag.outputs.npm_tag }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
