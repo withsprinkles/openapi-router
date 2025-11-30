@@ -30,6 +30,9 @@
     "[jsonc]": {
         "editor.defaultFormatter": "biomejs.biome"
     },
+    "[yaml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "[toml]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
