@@ -436,11 +436,10 @@ describe("type safety and inference", () => {
         const router = createRouter();
 
         router.map(spec, ({ body }) => {
-            if (body) {
-                expectTypeOf(body.name).toBeString();
-                expectTypeOf(body.email).toBeString();
-                expectTypeOf(body.age).toBeNumber();
-            }
+            expectTypeOf(body.name).toBeString();
+            expectTypeOf(body.email).toBeString();
+            expectTypeOf(body.age).toBeNumber();
+
             return json(
                 {
                     id: "new-id",
@@ -448,7 +447,7 @@ describe("type safety and inference", () => {
                     email: body?.email || "",
                     age: body?.age || 0,
                 },
-                201,
+                { status: 201 },
             );
         });
     });

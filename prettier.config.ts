@@ -1,6 +1,5 @@
-// @ts-check
+import type { Config } from "prettier";
 
-/** @type {import("prettier").Config} */
 export default {
     plugins: ["prettier-plugin-pkg", "prettier-plugin-toml"],
 
@@ -14,4 +13,4 @@ export default {
     // singleQuote: false,
     // trailingComma: "all",
     // proseWrap: "preserve",
-};
+} satisfies Config;
